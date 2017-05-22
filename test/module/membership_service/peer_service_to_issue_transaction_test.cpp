@@ -79,20 +79,22 @@ class peer_service_to_issue_transaction_test : public ::testing::Test {
       ASSERT_TRUE(transaction.peer().trust().value() == 1.0);
        */
     });
+
+    connection::initialize_peer();
     connection::run();
   }
   std::thread server_thread_torii;
-
-  static void SetUpTestCase() { connection::initialize_peer(); }
-
-  static void TearDownTestCase() { connection::finish(); }
 
   virtual void SetUp() {
     server_thread_torii = std::thread(
         &peer_service_to_issue_transaction_test::serverToriiReceive, this);
   }
 
-  virtual void TearDown() { server_thread_torii.detach(); }
+  virtual void TearDown() {
+    // Shutdown current working iroha server.
+    connection::finish();
+    server_thread_torii.join();
+  }
 };
 
 
